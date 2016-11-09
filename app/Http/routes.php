@@ -14,3 +14,9 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+$api = app('Dingo\Api\Routing\Router');
+
+$api->version('v1', ['middleware' => 'cors'], function ($api) {
+    $api->post('testcases', 'App\Http\Controllers\TestCaseController@matrix');
+});
