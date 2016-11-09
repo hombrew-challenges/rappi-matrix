@@ -17,15 +17,32 @@ class TestCaseController extends Controller {
 	 */
 	public function matrix(Request $request) {
 
+		// Error handling
+    if (!isset($request['testcases']))
+      return response()->json(['error' => 'testcases were not provided'], 400);
+    if (!is_array($request['testcases']))
+      return response()->json(['error' => 'testcases is not an array'], 400);
+    if (count($request['testcases']) < 1)
+      return response()->json(['error' => 'testcases array is empty'], 400);
 
 		$queries = []; // query operations results to return
-    foreach ($request['testcases'] as $testcase) {
+    foreach ($request['testcases'] as $tkey=>$testcase) {
+
+			// current testcase error handling
+      if (!isset($testcase['n']))
+        return response()->json(['error' => 'n was not provided in testcase '. strval($tkey+1)], 400);
+      if (!is_numeric($testcase['n']) || $testcase['n'] < 1 || $testcase['n'] != round($testcase['n']) )
+        return response()->json(['error' => 'n is not a positive integer in testcase '. strval($tkey+1)], 400);
+      if (!isset($testcase['operations']))
+        return response()->json(['error' => 'operations were not provided in testcase '. strval($tkey+1)], 400);
+      if (!is_array($testcase['operations']))
+        return response()->json(['error' => 'operations is not an array in testcase '. strval($tkey+1)], 400);
 
 			// current testcase matrix generation
       $matrix = [];
 	    $queries[] = [];
       if(count($testcase['operations']) < 1) {
-        $queries[count($queries) - 1] = 'No operations found for this testcase';
+        $queries[count($queries) - 1][] = 'No operations found for testcase '. strval($tkey+1);
         continue;
       }
       for ($i=0; $i < $testcase['n']; $i++) {
@@ -39,15 +56,17 @@ class TestCaseController extends Controller {
       }
 
 			// matrix operations execution
-      $queryOperationQuantity = 0;
-      foreach ($testcase['operations'] as $operation) {
+      $queryOperationsQuantity = 0;
+      foreach ($testcase['operations'] as $opkey=>$operation) {
+
+				// current operation error handling
+        if(!is_string($operation))
+          return response()->json(['error' => 'operation '. strval($opkey+1) .' in testcase '.strval($tkey+1).' is not a string'], 400);
 
 				$op = explode(' ', $operation);
         if ($op[0] === 'UPDATE') {
 					if (!$this->update($matrix, $op, $testcase['n']))
-						return response()->json(
-							['error' => 'wrong update operation format'], 400
-						);
+						return response()->json(['error' => 'wrong format for operation '. strval($opkey+1) .' of type UPDATE in testcase '.strval($tkey+1)], 400);
 				}
         else if ($op[0] === 'QUERY') {
 					if (!$this->query(
@@ -56,19 +75,17 @@ class TestCaseController extends Controller {
 								$testcase['n'],
 								$queries[count($queries) - 1]
 							))
-						return response()->json(
-							['error' => 'wrong query operation format'], 400
-						);
-          $queryOperationQuantity++;
+						return response()->json(['error' => 'wrong format for operation '. strval($opkey+1) .' of type QUERY in testcase '.strval($tkey+1)], 400);
+          $queryOperationsQuantity++;
         }
         else
 					return response()->json(
-						['error' => 'one of the operations type is not valid'], 400
+						['error' => 'operations '. strval($opkey+1) .' type is not valid'], 400
 					);
 			}
 
-			if ($queryOperationQuantity === 0)
-				$queries[count($queries) - 1][] = 'No query operations found';
+			if ($queryOperationsQuantity === 0)
+				$queries[count($queries) - 1][] = 'No query operations found for testcase '. strval($tkey+1);
 		}
 
 		return response()->json($queries);
@@ -100,7 +117,6 @@ class TestCaseController extends Controller {
   	$matrix[$op[1]-1][$op[2]-1][$op[3]-1] = $op[4];
     return true;
   }
-
 
 	/*
 	 * @description: query operation handler.
