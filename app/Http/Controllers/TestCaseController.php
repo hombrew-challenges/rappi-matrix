@@ -10,7 +10,7 @@ use Dingo\Api\Http\Request;
 
 class TestCaseController extends Controller {
 
-	/*
+	/**
 	 * @description: matrix testcases handler.
 	 * creates a matrix per testcase and applies all operations over it.
 	 * @return: array of 'query' operations results arrays.
@@ -91,7 +91,7 @@ class TestCaseController extends Controller {
 		return response()->json($queries);
 	}
 
-	/*
+	/**
 	 * @description: update operation handler.
 	 * updates (x, y, z) position of the matrix with w.
 	 * @param {array} $matrix: reference to the current matrix.
@@ -101,7 +101,6 @@ class TestCaseController extends Controller {
 	 */
 	private function update(& $matrix, $op, $n) {
 
-		// error_log('hola');
     // current operation error handling
     if (count($op) !== 5)
       return false;
@@ -118,14 +117,14 @@ class TestCaseController extends Controller {
     return true;
   }
 
-	/*
+	/**
 	 * @description: query operation handler.
 	 * adds every position content within (x1, y1, z1) and (x2, y2, z2).
 	 * @param {array} $matrix: value of the current matrix.
 	 * @param {array} $op: array with the current operation values.
 	 * @param {integer} $n: matrix sides length.
 	 * @param {array} $queries: reference to the current testcase query
-		 operations results array.
+	 * operations results array.
 	 * @return: true or false if operation is valid or invalid, respectively.
 	 */
 	private function query($matrix, $op, $n, & $queries) {
