@@ -13,7 +13,7 @@ class TestCaseController extends Controller {
 	/*
 	 * @description: matrix testcases handler.
 	 * creates a matrix per testcase and applies all operations over it.
-	 * @return: array of 'query' operations per testcase.
+	 * @return: array of 'query' operations results arrays.
 	 */
 	public function matrix(Request $request) {
 
@@ -30,19 +30,19 @@ class TestCaseController extends Controller {
 
 			// current testcase error handling
       if (!isset($testcase['n']))
-        return response()->json(['error' => 'n was not provided in testcase '. strval($tkey+1)], 400);
+        return response()->json(['error' => 'n was not provided in testcase '.strval($tkey+1)], 400);
       if (!is_numeric($testcase['n']) || $testcase['n'] < 1 || $testcase['n'] != round($testcase['n']) )
-        return response()->json(['error' => 'n is not a positive integer in testcase '. strval($tkey+1)], 400);
+        return response()->json(['error' => 'n is not a positive integer in testcase '.strval($tkey+1)], 400);
       if (!isset($testcase['operations']))
-        return response()->json(['error' => 'operations were not provided in testcase '. strval($tkey+1)], 400);
+        return response()->json(['error' => 'operations were not provided in testcase '.strval($tkey+1)], 400);
       if (!is_array($testcase['operations']))
-        return response()->json(['error' => 'operations is not an array in testcase '. strval($tkey+1)], 400);
+        return response()->json(['error' => 'operations is not an array in testcase '.strval($tkey+1)], 400);
 
 			// current testcase matrix generation
       $matrix = [];
 	    $queries[] = [];
       if(count($testcase['operations']) < 1) {
-        $queries[count($queries) - 1][] = 'No operations found for testcase '. strval($tkey+1);
+        $queries[count($queries) - 1][] = 'No operations found for testcase '.strval($tkey+1);
         continue;
       }
       for ($i=0; $i < $testcase['n']; $i++) {
@@ -55,18 +55,18 @@ class TestCaseController extends Controller {
         }
       }
 
-			// matrix operations execution
+			// current matrix operations execution
       $queryOperationsQuantity = 0;
       foreach ($testcase['operations'] as $opkey=>$operation) {
 
 				// current operation error handling
         if(!is_string($operation))
-          return response()->json(['error' => 'operation '. strval($opkey+1) .' in testcase '.strval($tkey+1).' is not a string'], 400);
+          return response()->json(['error' => 'operation '.strval($opkey+1).' in testcase '.strval($tkey+1).' is not a string'], 400);
 
 				$op = explode(' ', $operation);
         if ($op[0] === 'UPDATE') {
 					if (!$this->update($matrix, $op, $testcase['n']))
-						return response()->json(['error' => 'wrong format for operation '. strval($opkey+1) .' of type UPDATE in testcase '.strval($tkey+1)], 400);
+						return response()->json(['error' => 'wrong format for operation '.strval($opkey+1).' of type UPDATE in testcase '.strval($tkey+1)], 400);
 				}
         else if ($op[0] === 'QUERY') {
 					if (!$this->query(
@@ -75,17 +75,17 @@ class TestCaseController extends Controller {
 								$testcase['n'],
 								$queries[count($queries) - 1]
 							))
-						return response()->json(['error' => 'wrong format for operation '. strval($opkey+1) .' of type QUERY in testcase '.strval($tkey+1)], 400);
+						return response()->json(['error' => 'wrong format for operation '.strval($opkey+1).' of type QUERY in testcase '.strval($tkey+1)], 400);
           $queryOperationsQuantity++;
         }
         else
 					return response()->json(
-						['error' => 'operations '. strval($opkey+1) .' type is not valid'], 400
+						['error' => 'operation '.strval($opkey+1).' type of testcase '.strval($tkey+1).' is not valid'], 400
 					);
 			}
 
 			if ($queryOperationsQuantity === 0)
-				$queries[count($queries) - 1][] = 'No query operations found for testcase '. strval($tkey+1);
+				$queries[count($queries) - 1][] = 'No query operations found for testcase '.strval($tkey+1);
 		}
 
 		return response()->json($queries);
