@@ -1,7 +1,7 @@
 <?php
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Headers: Authorization, Content-Type');
-header('Access-Control-Allow-Methods: POST');
+// header('Access-Control-Allow-Origin: *');
+// header('Access-Control-Allow-Headers: Authorization, Content-Type');
+// header('Access-Control-Allow-Methods: POST');
 /*
 |--------------------------------------------------------------------------
 | Application Routes
